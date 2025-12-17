@@ -4,16 +4,21 @@ import QtQuick.Controls
 // Infinite Canvas component with pan and zoom capabilities
 Item {
     id: root
+    clip: true  // Constrain rendering to viewport boundaries
     
     // Public properties
-    property real zoomLevel: 0.5  // Start zoomed out
+    property real zoomLevel: 1.0  // Start at 100%
     readonly property real minZoom: 0.1
     readonly property real maxZoom: 10.0
-    readonly property real zoomStep: 1.2
+    readonly property real zoomStep: 1.05  // 5% zoom increments
     
     // Canvas offset for panning (represents camera position)
     property real offsetX: 0
     property real offsetY: 0
+    
+    // Cursor position in canvas coordinates
+    property real cursorX: 0
+    property real cursorY: 0
     
     // Drawing mode
     property string drawingMode: ""  // "" for pan, "rectangle" for drawing rectangles
@@ -51,8 +56,8 @@ Item {
             }
         ]
         
-        // Grid background for visual reference
-        Canvas {
+        // Grid background using vector-based rectangles for performance
+        Item {
             id: gridCanvas
             anchors.centerIn: parent
             width: 36000   // Large size for "infinite" feel
@@ -61,59 +66,33 @@ Item {
             property real gridSize: 32  // Grid cell size in pixels
             property color gridColor: "#3a3a3a"
             property color majorGridColor: "#5a5a5a"  // Lighter grey for major lines
+            property int majorGridMultiplier: 5
             
-            onPaint: {
-                var ctx = getContext("2d");
-                ctx.clearRect(0, 0, width, height);
-                
-                // Calculate visible grid bounds
-                var startX = 0;
-                var startY = 0;
-                var endX = width;
-                var endY = height;
-                
-                // Draw minor grid lines
-                ctx.strokeStyle = gridColor;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                
-                // Vertical lines
-                for (var x = startX; x <= endX; x += gridSize) {
-                    ctx.moveTo(x, startY);
-                    ctx.lineTo(x, endY);
+            // Minor grid lines - vertical
+            Repeater {
+                model: Math.ceil(gridCanvas.width / gridCanvas.gridSize) + 1
+                Rectangle {
+                    x: index * gridCanvas.gridSize
+                    y: 0
+                    width: 1
+                    height: gridCanvas.height
+                    color: (index % gridCanvas.majorGridMultiplier === 0) ? gridCanvas.majorGridColor : gridCanvas.gridColor
+                    antialiasing: false
                 }
-                
-                // Horizontal lines
-                for (var y = startY; y <= endY; y += gridSize) {
-                    ctx.moveTo(startX, y);
-                    ctx.lineTo(endX, y);
-                }
-                
-                ctx.stroke();
-                
-                // Draw major grid lines (every 5 cells)
-                ctx.strokeStyle = majorGridColor;
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                
-                var majorGridSize = gridSize * 5;
-                
-                // Vertical major lines
-                for (x = startX; x <= endX; x += majorGridSize) {
-                    ctx.moveTo(x, startY);
-                    ctx.lineTo(x, endY);
-                }
-                
-                // Horizontal major lines
-                for (y = startY; y <= endY; y += majorGridSize) {
-                    ctx.moveTo(startX, y);
-                    ctx.lineTo(endX, y);
-                }
-                
-                ctx.stroke();
             }
             
-            Component.onCompleted: requestPaint()
+            // Minor grid lines - horizontal
+            Repeater {
+                model: Math.ceil(gridCanvas.height / gridCanvas.gridSize) + 1
+                Rectangle {
+                    x: 0
+                    y: index * gridCanvas.gridSize
+                    width: gridCanvas.width
+                    height: 1
+                    color: (index % gridCanvas.majorGridMultiplier === 0) ? gridCanvas.majorGridColor : gridCanvas.gridColor
+                    antialiasing: false
+                }
+            }
         }
         
         // Layer for drawn shapes - positioned at grid center
@@ -189,6 +168,7 @@ Item {
         id: mouseArea
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
+        hoverEnabled: true  // Track mouse position even when not pressed
         
         property real lastX: 0
         property real lastY: 0
@@ -261,9 +241,13 @@ Item {
         }
         
         onPositionChanged: (mouse) => {
+            // Always update cursor position in canvas coordinates
+            var canvasCoords = screenToCanvas(mouse.x, mouse.y);
+            root.cursorX = canvasCoords.x;
+            root.cursorY = canvasCoords.y;
+            
             if (isDrawing) {
                 // Update the current rectangle being drawn
-                var canvasCoords = screenToCanvas(mouse.x, mouse.y);
                 
                 // Calculate width and height from start point to current point
                 var width = canvasCoords.x - drawStartX;

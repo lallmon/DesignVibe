@@ -5,12 +5,12 @@ A digital design application built with PySide6 and Qt Quick.
 ## Features
 
 ### Rendering Canvas
-- **Infinite canvas** (36,000 x 36,000 pixels) with pan and zoom capabilities
+- **Infinite canvas** with pan and zoom capabilities
 - **Grid system** with minor and major gridlines for visual reference
 - **Zoom controls**: Mouse wheel, keyboard shortcuts (Ctrl+/Ctrl-/Ctrl+0), and menu options
 - **Pan navigation**: Click and drag with left mouse button
 - **Crisp rendering** with smooth transformations
-- Starts with a zoomed-out view for better overview
+- Starts at 100% zoom level
 
 ### Drawing Tools
 - **Rectangle tool**: Draw vector rectangles on the canvas
@@ -46,7 +46,8 @@ A digital design application built with PySide6 and Qt Quick.
 - `main.py` - Application entry point
 - `main.qml` - Main application window with menu bar
 - `Components/` - QML components directory
-  - `InfiniteCanvas.qml` - Infinite canvas component with pan/zoom and drawing
+  - `Canvas.qml` - Canvas component with pan/zoom and drawing
+  - `MenuBar.qml` - Application menu bar with File and View menus
   - `StatusBar.qml` - Status bar component with zoom level display
   - `ToolBar.qml` - Left toolbar with drawing tool buttons
 - `pyproject.toml` - Project configuration

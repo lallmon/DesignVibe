@@ -12,37 +12,14 @@ ApplicationWindow {
 
     // Menu Bar
     menuBar: MenuBar {
-        Menu {
-            title: qsTr("&File")
-            Action {
-                text: qsTr("E&xit (Ctrl+Q)")
-                shortcut: StandardKey.Quit
-                onTriggered: Qt.quit()
-            }
-        }
-        Menu {
-            title: qsTr("&View")
-            Action {
-                text: qsTr("Zoom &In (Ctrl++)")
-                shortcut: StandardKey.ZoomIn
-                onTriggered: canvas.zoomIn()
-            }
-            Action {
-                text: qsTr("Zoom &Out (Ctrl+-)")
-                shortcut: StandardKey.ZoomOut
-                onTriggered: canvas.zoomOut()
-            }
-            Action {
-                text: qsTr("&Reset Zoom (Ctrl+0)")
-                shortcut: "Ctrl+0"
-                onTriggered: canvas.resetZoom()
-            }
-        }
+        canvas: canvas
     }
 
     // Status Bar
     footer: StatusBar {
         zoomLevel: canvas.zoomLevel
+        cursorX: canvas.cursorX
+        cursorY: canvas.cursorY
     }
 
     // Main content area with toolbar and canvas
@@ -61,7 +38,7 @@ ApplicationWindow {
         }
         
         // Main Canvas Area
-        InfiniteCanvas {
+        Canvas {
             id: canvas
             Layout.fillWidth: true
             Layout.fillHeight: true
