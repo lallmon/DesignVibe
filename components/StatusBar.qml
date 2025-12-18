@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "." as DV
 
 // Status Bar component showing application status information
 ToolBar {
@@ -28,8 +29,8 @@ ToolBar {
             
             PhIcon {
                 name: "crosshair-simple"
-                size: 16
-                color: "#dcdcdc"
+                size: DV.Theme.sizes.statusIconSize
+                color: DV.Theme.colors.textSubtle
             }
             
             Label {
@@ -50,8 +51,8 @@ ToolBar {
             
             PhIcon {
                 name: "magnifying-glass"
-                size: 16
-                color: "#dcdcdc"
+                size: DV.Theme.sizes.statusIconSize
+                color: DV.Theme.colors.textSubtle
             }
             
             Label {

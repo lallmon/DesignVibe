@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import "." as DV
 
 // Vertical toolbar for drawing tools
 Rectangle {
     id: root
-    width: 48
-    color: "#3c3c3c"
+    width: DV.Theme.sizes.toolBarWidth
+    color: DV.Theme.colors.panelBackground
     
     // Signal emitted when a tool is selected
     signal toolSelected(string toolName)
@@ -16,14 +17,14 @@ Rectangle {
     
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 8
-        spacing: 8
+        anchors.margins: DV.Theme.sizes.toolBarPadding
+        spacing: DV.Theme.sizes.toolBarSpacing
         
         // Selection tool button
         Button {
             id: selButton
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 32
+            Layout.preferredWidth: DV.Theme.sizes.toolButtonSize
+            Layout.preferredHeight: DV.Theme.sizes.toolButtonSize
             Layout.alignment: Qt.AlignHCenter
             
             text: ""
@@ -35,7 +36,7 @@ Rectangle {
                 PhIcon {
                     anchors.centerIn: parent
                     name: "hand-pointing"
-                    size: 20
+                    size: DV.Theme.sizes.iconSize
                     color: "white"
                 }
             }
@@ -53,18 +54,18 @@ Rectangle {
             
             // Visual feedback for active state
             background: Rectangle {
-                color: selButton.checked ? "#5c5c5c" : (selButton.hovered ? "#4c4c4c" : "#3c3c3c")
-                border.color: selButton.checked ? "#ffffff" : "#6c6c6c"
+                color: selButton.checked ? DV.Theme.colors.panelActive : (selButton.hovered ? DV.Theme.colors.panelHover : DV.Theme.colors.panelBackground)
+                border.color: selButton.checked ? "#ffffff" : DV.Theme.colors.borderDefault
                 border.width: 1
-                radius: 4
+                radius: DV.Theme.sizes.radiusMd
             }
         }
         
         // Rectangle tool button
         Button {
             id: rectButton
-            Layout.preferredWidth: 32
-            Layout.preferredHeight: 32
+            Layout.preferredWidth: DV.Theme.sizes.toolButtonSize
+            Layout.preferredHeight: DV.Theme.sizes.toolButtonSize
             Layout.alignment: Qt.AlignHCenter
             
             text: ""
@@ -76,7 +77,7 @@ Rectangle {
                 PhIcon {
                     anchors.centerIn: parent
                     name: "rectangle"
-                    size: 20
+                    size: DV.Theme.sizes.iconSize
                     color: "white"
                 }
             }
@@ -94,10 +95,10 @@ Rectangle {
             
             // Visual feedback for active state
             background: Rectangle {
-                color: rectButton.checked ? "#5c5c5c" : (rectButton.hovered ? "#4c4c4c" : "#3c3c3c")
-                border.color: rectButton.checked ? "#ffffff" : "#6c6c6c"
+                color: rectButton.checked ? DV.Theme.colors.panelActive : (rectButton.hovered ? DV.Theme.colors.panelHover : DV.Theme.colors.panelBackground)
+                border.color: rectButton.checked ? "#ffffff" : DV.Theme.colors.borderDefault
                 border.width: 1
-                radius: 4
+                radius: DV.Theme.sizes.radiusMd
             }
         }
         

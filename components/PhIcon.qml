@@ -1,5 +1,6 @@
 import QtQuick
 import Qt5Compat.GraphicalEffects
+import "." as DV
 
 Item {
     id: root
@@ -9,7 +10,7 @@ Item {
     // Icon weight directory under assets/phosphor/, defaults to "regular"
     property string weight: "regular"
     // Icon pixel size (width and height)
-    property real size: 20
+    property real size: DV.Theme.sizes.iconSize
     // Tint color; set to "transparent" to keep original SVG color
     property color color: "white"
 
@@ -50,13 +51,13 @@ Item {
         anchors.fill: parent
         visible: image.status === Image.Error
         color: "#00000000"
-        border.color: "#ff7373"
-        radius: 3
+        border.color: DV.Theme.colors.error
+        radius: DV.Theme.sizes.radiusSm
 
         Text {
             anchors.centerIn: parent
             text: "?"
-            color: "#ff7373"
+            color: DV.Theme.colors.error
             font.pixelSize: 10
         }
     }

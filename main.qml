@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "Components"
+import "components"
 
 ApplicationWindow {
     id: root

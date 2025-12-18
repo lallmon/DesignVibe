@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import QtQuick.Dialogs
+import "." as DV
 
 // Tool Settings Bar - displays settings for the currently active tool
 ToolBar {
@@ -39,8 +40,8 @@ ToolBar {
             
             TextField {
                 id: strokeWidthInput
-                Layout.preferredWidth: 50
-                Layout.preferredHeight: 20
+                Layout.preferredWidth: DV.Theme.sizes.settingsStrokeWidthFieldWidth
+                Layout.preferredHeight: DV.Theme.sizes.settingsFieldHeight
                 Layout.alignment: Qt.AlignVCenter
                 text: root.rectangleStrokeWidth.toString()
                 horizontalAlignment: TextInput.AlignHCenter
@@ -73,10 +74,10 @@ ToolBar {
                 }
                 
                 background: Rectangle {
-                    color: "#3a3a3a"
-                    border.color: strokeWidthInput.activeFocus ? "#0078d4" : "#555555"
+                    color: DV.Theme.colors.gridMinor
+                    border.color: strokeWidthInput.activeFocus ? DV.Theme.colors.accent : DV.Theme.colors.borderSubtle
                     border.width: 1
-                    radius: 2
+                    radius: DV.Theme.sizes.radiusSm
                 }
                 
                 color: "#ffffff"
@@ -95,7 +96,7 @@ ToolBar {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.leftMargin: 6
                 Layout.rightMargin: 6
-                color: "#555555"
+                color: DV.Theme.colors.borderSubtle
             }
             
             Label {
@@ -116,9 +117,9 @@ ToolBar {
                 
                 background: Rectangle {
                     color: root.rectangleStrokeColor
-                    border.color: "#555555"
+                    border.color: DV.Theme.colors.borderSubtle
                     border.width: 1
-                    radius: 2
+                    radius: DV.Theme.sizes.radiusSm
                 }
             }
             
@@ -129,7 +130,7 @@ ToolBar {
                 Layout.alignment: Qt.AlignVCenter
                 Layout.leftMargin: 6
                 Layout.rightMargin: 6
-                color: "#555555"
+                color: DV.Theme.colors.borderSubtle
             }
             
             Label {
@@ -149,9 +150,9 @@ ToolBar {
                 }
                 
                 background: Rectangle {
-                    border.color: "#555555"
+                    border.color: DV.Theme.colors.borderSubtle
                     border.width: 1
-                    radius: 2
+                    radius: DV.Theme.sizes.radiusSm
                     color: "transparent"
                     clip: true
                     
@@ -200,8 +201,8 @@ ToolBar {
                 Layout.preferredWidth: 80
                 // When we customize handle/background, the Slider can lose its implicit height,
                 // which causes RowLayout to give it ~0 height (no hit area). Explicitly size it.
-                Layout.preferredHeight: 16
-                implicitHeight: 16
+                Layout.preferredHeight: DV.Theme.sizes.sliderHeight
+                implicitHeight: DV.Theme.sizes.sliderHeight
                 Layout.alignment: Qt.AlignVCenter
                 from: 0
                 to: 100
@@ -235,39 +236,39 @@ ToolBar {
                     x: opacitySlider.leftPadding
                     y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
                     width: opacitySlider.availableWidth
-                    height: 4
+                    height: DV.Theme.sizes.sliderTrackHeight
                     // Provide implicit sizes so the control has a non-zero implicitHeight/Width in layouts
                     implicitWidth: 80
-                    implicitHeight: 4
-                    radius: 2
-                    color: "#3a3a3a"
+                    implicitHeight: DV.Theme.sizes.sliderTrackHeight
+                    radius: DV.Theme.sizes.radiusSm
+                    color: DV.Theme.colors.gridMinor
                     
                     Rectangle {
                         width: opacitySlider.visualPosition * parent.width
                         height: parent.height
-                        color: "#0078d4"
-                        radius: 2
+                        color: DV.Theme.colors.accent
+                        radius: DV.Theme.sizes.radiusSm
                     }
                 }
                 
                 handle: Rectangle {
                     x: opacitySlider.leftPadding + opacitySlider.visualPosition * (opacitySlider.availableWidth - width)
                     y: opacitySlider.topPadding + opacitySlider.availableHeight / 2 - height / 2
-                    width: 12
-                    height: 12
-                    implicitWidth: 12
-                    implicitHeight: 12
-                    radius: 6
-                    color: opacitySlider.pressed ? "#0078d4" : "#ffffff"
-                    border.color: "#555555"
+                    width: DV.Theme.sizes.sliderHandleSize
+                    height: DV.Theme.sizes.sliderHandleSize
+                    implicitWidth: DV.Theme.sizes.sliderHandleSize
+                    implicitHeight: DV.Theme.sizes.sliderHandleSize
+                    radius: DV.Theme.sizes.radiusLg
+                    color: opacitySlider.pressed ? DV.Theme.colors.accent : "#ffffff"
+                    border.color: DV.Theme.colors.borderSubtle
                     border.width: 1
                 }
             }
             
             TextField {
                 id: opacityInput
-                Layout.preferredWidth: 35
-                Layout.preferredHeight: 20
+                Layout.preferredWidth: DV.Theme.sizes.settingsOpacityFieldWidth
+                Layout.preferredHeight: DV.Theme.sizes.settingsFieldHeight
                 Layout.alignment: Qt.AlignVCenter
                 text: Math.round(root.rectangleFillOpacity * 100).toString()
                 horizontalAlignment: TextInput.AlignHCenter
@@ -309,10 +310,10 @@ ToolBar {
                 }
                 
                 background: Rectangle {
-                    color: "#3a3a3a"
-                    border.color: opacityInput.activeFocus ? "#0078d4" : "#555555"
+                    color: DV.Theme.colors.gridMinor
+                    border.color: opacityInput.activeFocus ? DV.Theme.colors.accent : DV.Theme.colors.borderSubtle
                     border.width: 1
-                    radius: 2
+                    radius: DV.Theme.sizes.radiusSm
                 }
                 
                 color: "#ffffff"

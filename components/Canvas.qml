@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import "." as DV
 
 // Infinite Canvas component with pan and zoom capabilities
 Item {
@@ -35,7 +36,7 @@ Item {
     // Background color
     Rectangle {
         anchors.fill: parent
-        color: "#2b2b2b"
+        color: DV.Theme.colors.canvasBackground
     }
     
     // The main canvas surface that can be panned and zoomed
@@ -67,8 +68,8 @@ Item {
             height: 36000
             
             property real gridSize: 32  // Grid cell size in pixels
-            property color gridColor: "#3a3a3a"
-            property color majorGridColor: "#5a5a5a"  // Lighter grey for major lines
+            property color gridColor: DV.Theme.colors.gridMinor
+            property color majorGridColor: DV.Theme.colors.gridMajor  // Lighter grey for major lines
             property int majorGridMultiplier: 5
             
             // Minor grid lines - vertical

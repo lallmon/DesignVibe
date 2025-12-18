@@ -45,7 +45,7 @@ A digital design application built with PySide6 and Qt Quick.
 
 - `main.py` - Application entry point
 - `main.qml` - Main application window with menu bar
-- `Components/` - QML components directory
+- `components/` - QML components directory
   - `Canvas.qml` - Canvas component with pan/zoom and drawing
   - `MenuBar.qml` - Application menu bar with File and View menus
   - `StatusBar.qml` - Status bar component with zoom level display
