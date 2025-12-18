@@ -22,26 +22,45 @@ ApplicationWindow {
         cursorY: canvas.cursorY
     }
 
-    // Main content area with toolbar and canvas
-    RowLayout {
+    // Main layout with tool settings and content
+    ColumnLayout {
         anchors.fill: parent
         spacing: 0
         
-        // Left toolbar
-        ToolBar {
-            id: toolBar
-            Layout.fillHeight: true
-            
-            onToolSelected: (toolName) => {
-                canvas.setDrawingMode(toolName)
-            }
+        // Tool Settings Bar
+        ToolSettings {
+            id: toolSettings
+            Layout.fillWidth: true
+            Layout.preferredHeight: 32
+            activeTool: canvas.drawingMode === "" ? "select" : canvas.drawingMode
         }
         
-        // Main Canvas Area
-        Canvas {
-            id: canvas
+        // Main content area with toolbar and canvas
+        RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
+            spacing: 0
+            
+            // Left toolbar
+            ToolBar {
+                id: toolBar
+                Layout.fillHeight: true
+                
+                onToolSelected: (toolName) => {
+                    canvas.setDrawingMode(toolName)
+                }
+            }
+            
+            // Main Canvas Area
+            Canvas {
+                id: canvas
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                rectangleStrokeWidth: toolSettings.rectangleStrokeWidth
+                rectangleStrokeColor: toolSettings.rectangleStrokeColor
+                rectangleFillColor: toolSettings.rectangleFillColor
+                rectangleFillOpacity: toolSettings.rectangleFillOpacity
+            }
         }
     }
 }

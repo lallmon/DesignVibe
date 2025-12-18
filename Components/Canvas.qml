@@ -23,11 +23,14 @@ Item {
     // Drawing mode
     property string drawingMode: ""  // "" for pan, "rectangle" for drawing rectangles
     
+    // Tool settings
+    property real rectangleStrokeWidth: 1
+    property color rectangleStrokeColor: "#ffffff"  // White by default
+    property color rectangleFillColor: "#ffffff"  // White by default
+    property real rectangleFillOpacity: 0.0  // Transparent by default
+    
     // List to store drawn rectangles
     property var rectangles: []
-    
-    // Current rectangle being drawn
-    property var currentRect: null
     
     // Background color
     Rectangle {
@@ -110,133 +113,90 @@ Item {
                     y: modelData.y
                     width: modelData.width
                     height: modelData.height
-                    color: "transparent"
-                    border.color: "red"
-                    border.width: 2 / root.zoomLevel
+                    // Use Qt.rgba to apply opacity only to fill color
+                    color: {
+                        var fillColor = Qt.color(modelData.fillColor);
+                        return Qt.rgba(fillColor.r, fillColor.g, fillColor.b, modelData.fillOpacity);
+                    }
+                    border.color: modelData.strokeColor
+                    border.width: modelData.strokeWidth / root.zoomLevel
                 }
             }
             
-            // Preview rectangle with dashed border (shown while drawing)
-            Item {
-                id: previewRect
-                visible: root.currentRect !== null && 
-                         root.currentRect !== undefined &&
-                         root.currentRect.width > 0 &&
-                         root.currentRect.height > 0
-                x: root.currentRect ? root.currentRect.x : 0
-                y: root.currentRect ? root.currentRect.y : 0
-                width: root.currentRect ? root.currentRect.width : 0
-                height: root.currentRect ? root.currentRect.height : 0
+            // Select tool for panning and selection
+            SelectTool {
+                id: selectTool
+                active: root.drawingMode === ""
                 
-                // Dashed border drawn with Canvas
-                Canvas {
-                    id: dashedCanvas
-                    anchors.fill: parent
-                    
-                    onPaint: {
-                        var ctx = getContext("2d");
-                        ctx.clearRect(0, 0, width, height);
-                        
-                        if (width > 0 && height > 0) {
-                            ctx.strokeStyle = "red";
-                            ctx.lineWidth = 2 / root.zoomLevel;
-                            ctx.setLineDash([8 / root.zoomLevel, 4 / root.zoomLevel]);
-                            ctx.strokeRect(0, 0, width, height);
-                        }
-                    }
-                    
-                    Component.onCompleted: requestPaint()
-                    
-                    Connections {
-                        target: previewRect
-                        function onWidthChanged() { dashedCanvas.requestPaint() }
-                        function onHeightChanged() { dashedCanvas.requestPaint() }
-                        function onVisibleChanged() { if (previewRect.visible) dashedCanvas.requestPaint() }
-                    }
-                    
-                    Connections {
-                        target: root
-                        function onZoomLevelChanged() { dashedCanvas.requestPaint() }
-                    }
+                onPanDelta: (dx, dy) => {
+                    root.offsetX += dx;
+                    root.offsetY += dy;
+                }
+                
+                onCursorShapeChanged: (shape) => {
+                    mouseArea.cursorShape = shape;
+                }
+            }
+            
+            // Rectangle drawing tool
+            RectangleTool {
+                id: rectangleTool
+                zoomLevel: root.zoomLevel
+                active: root.drawingMode === "rectangle"
+                
+                onRectangleCompleted: (x, y, width, height) => {
+                    // Add the completed rectangle to the list
+                    // Copy values (not bindings) to ensure each rectangle has independent properties
+                    var strokeWidth = Number(root.rectangleStrokeWidth);
+                    var strokeColorString = root.rectangleStrokeColor.toString();
+                    var fillColorString = root.rectangleFillColor.toString();
+                    var fillOpacity = Number(root.rectangleFillOpacity);
+                    console.log("Creating rectangle with stroke width:", strokeWidth, "stroke color:", strokeColorString, 
+                               "fill color:", fillColorString, "fill opacity:", fillOpacity);
+                    var rects = root.rectangles.slice();
+                    rects.push({
+                        x: x,
+                        y: y,
+                        width: width,
+                        height: height,
+                        strokeWidth: strokeWidth,
+                        strokeColor: strokeColorString,
+                        fillColor: fillColorString,
+                        fillOpacity: fillOpacity
+                    });
+                    root.rectangles = rects;
+                    console.log("Total rectangles:", root.rectangles.length);
                 }
             }
         }
     }
     
-    // Mouse area for panning and drawing
+    // Mouse area for tool interaction
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton
         hoverEnabled: true  // Track mouse position even when not pressed
         
-        property real lastX: 0
-        property real lastY: 0
-        property bool isPanning: false
-        property bool isDrawing: false
-        property real drawStartX: 0
-        property real drawStartY: 0
-        
         onPressed: (mouse) => {
-            if (root.drawingMode === "rectangle" && mouse.button === Qt.LeftButton) {
-                // Start drawing a rectangle
-                isDrawing = true;
-                
-                // Convert screen coordinates to canvas coordinates
-                var canvasCoords = screenToCanvas(mouse.x, mouse.y);
-                drawStartX = canvasCoords.x;
-                drawStartY = canvasCoords.y;
-                
-                console.log("Draw start:", drawStartX, drawStartY);
-                
-                // Initialize rectangle at start point with 0 size
-                root.currentRect = {
-                    x: drawStartX,
-                    y: drawStartY,
-                    width: 1,
-                    height: 1
-                };
-                
-                cursorShape = Qt.CrossCursor;
-            } else if (mouse.button === Qt.LeftButton || mouse.button === Qt.MiddleButton) {
-                // Pan with left or middle button when not in drawing mode
-                isPanning = true;
-                lastX = mouse.x;
-                lastY = mouse.y;
-                cursorShape = Qt.ClosedHandCursor;
+            // Delegate to active tool
+            if (root.drawingMode === "") {
+                selectTool.handlePress(mouse.x, mouse.y, mouse.button);
             }
         }
         
         onReleased: (mouse) => {
-            if (isDrawing && mouse.button === Qt.LeftButton) {
-                // Finalize the rectangle if it has size
-                if (root.currentRect && 
-                    root.currentRect.width > 1 && 
-                    root.currentRect.height > 1) {
-                    
-                    console.log("Finalizing rect:", root.currentRect.x, root.currentRect.y, 
-                               root.currentRect.width, root.currentRect.height);
-                    
-                    // Add the rectangle to the list (create new array to trigger binding)
-                    var rects = root.rectangles.slice();
-                    rects.push({
-                        x: root.currentRect.x,
-                        y: root.currentRect.y,
-                        width: root.currentRect.width,
-                        height: root.currentRect.height
-                    });
-                    root.rectangles = rects;
-                    
-                    console.log("Total rectangles:", root.rectangles.length);
-                }
-                
-                // Clear current rectangle and reset drawing state
-                root.currentRect = null;
-                isDrawing = false;
-                cursorShape = Qt.CrossCursor;
-            } else {
-                isPanning = false;
-                cursorShape = root.drawingMode === "rectangle" ? Qt.CrossCursor : Qt.ArrowCursor;
+            // Delegate to active tool
+            if (root.drawingMode === "") {
+                selectTool.handleRelease(mouse.x, mouse.y, mouse.button);
+            }
+        }
+        
+        onClicked: (mouse) => {
+            if (root.drawingMode === "rectangle" && mouse.button === Qt.LeftButton) {
+                // Delegate to rectangle tool
+                var canvasCoords = screenToCanvas(mouse.x, mouse.y);
+                rectangleTool.handleClick(canvasCoords.x, canvasCoords.y);
             }
         }
         
@@ -246,37 +206,11 @@ Item {
             root.cursorX = canvasCoords.x;
             root.cursorY = canvasCoords.y;
             
-            if (isDrawing) {
-                // Update the current rectangle being drawn
-                
-                // Calculate width and height from start point to current point
-                var width = canvasCoords.x - drawStartX;
-                var height = canvasCoords.y - drawStartY;
-                
-                // Handle dragging in any direction (normalize rectangle)
-                var rectX = width >= 0 ? drawStartX : canvasCoords.x;
-                var rectY = height >= 0 ? drawStartY : canvasCoords.y;
-                var rectWidth = Math.abs(width);
-                var rectHeight = Math.abs(height);
-                
-                console.log("Drawing rect:", rectX, rectY, rectWidth, rectHeight);
-                
-                // Update current rectangle (create new object to trigger binding)
-                root.currentRect = {
-                    x: rectX,
-                    y: rectY,
-                    width: rectWidth,
-                    height: rectHeight
-                };
-            } else if (isPanning) {
-                var dx = mouse.x - lastX;
-                var dy = mouse.y - lastY;
-                
-                root.offsetX += dx;
-                root.offsetY += dy;
-                
-                lastX = mouse.x;
-                lastY = mouse.y;
+            // Delegate to active tool
+            if (root.drawingMode === "") {
+                selectTool.handleMouseMove(mouse.x, mouse.y);
+            } else if (root.drawingMode === "rectangle") {
+                rectangleTool.handleMouseMove(canvasCoords.x, canvasCoords.y);
             }
         }
         
@@ -337,6 +271,14 @@ Item {
     // Set the drawing mode
     function setDrawingMode(mode) {
         console.log("Setting drawing mode to:", mode);
+        
+        // Reset any active tool
+        if (drawingMode === "") {
+            selectTool.reset();
+        } else if (drawingMode === "rectangle") {
+            rectangleTool.reset();
+        }
+        
         // "select" mode is the same as no mode (pan/zoom)
         if (mode === "select") {
             drawingMode = "";
