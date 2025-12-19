@@ -50,6 +50,19 @@ Item {
             zoomLevel: root.zoomLevel
         }
         
+        // Selection indicator overlay
+        Rectangle {
+            property real selectionPadding: 8  // Padding around selected object in canvas units
+            visible: DV.SelectionManager.selectedItemIndex >= 0 && DV.SelectionManager.selectedItem
+            x: visible ? DV.SelectionManager.selectedItem.x - selectionPadding : 0
+            y: visible ? DV.SelectionManager.selectedItem.y - selectionPadding : 0
+            width: visible ? DV.SelectionManager.selectedItem.width + selectionPadding * 2 : 0
+            height: visible ? DV.SelectionManager.selectedItem.height + selectionPadding * 2 : 0
+            color: "transparent"
+            border.color: DV.Theme.colors.accent  // Light blue
+            border.width: 2 / root.zoomLevel  // Inverse scale with zoom
+        }
+        
         // Select tool for object selection (panning handled by Viewport)
         SelectTool {
             id: selectTool
@@ -61,6 +74,11 @@ Item {
             
             onCursorShapeChanged: (shape) => {
                 root.currentCursorShape = shape;
+            }
+            
+            onObjectClicked: (viewportX, viewportY) => {
+                var canvasCoords = root.viewportToCanvas(viewportX, viewportY);
+                root.selectItemAt(canvasCoords.x, canvasCoords.y);
             }
         }
         
@@ -168,6 +186,35 @@ Item {
         } else {
             root.currentCursorShape = Qt.OpenHandCursor;
         }
+        
+        // Clear selection when switching to rectangle tool
+        if (mode === "rectangle") {
+            DV.SelectionManager.selectedItemIndex = -1;
+            DV.SelectionManager.selectedItem = null;
+        }
+    }
+    
+    // Hit test to find item at canvas coordinates
+    function hitTest(canvasX, canvasY) {
+        // Iterate backwards (topmost items first)
+        for (var i = items.length - 1; i >= 0; i--) {
+            var item = items[i];
+            if (item.type === "rectangle") {
+                // Check if point is within rectangle bounds
+                if (canvasX >= item.x && canvasX <= item.x + item.width &&
+                    canvasY >= item.y && canvasY <= item.y + item.height) {
+                    return i;
+                }
+            }
+        }
+        return -1; // No hit
+    }
+    
+    // Select item at canvas coordinates
+    function selectItemAt(canvasX, canvasY) {
+        var hitIndex = hitTest(canvasX, canvasY);
+        DV.SelectionManager.selectedItemIndex = hitIndex;
+        DV.SelectionManager.selectedItem = (hitIndex >= 0) ? items[hitIndex] : null;
     }
 }
 

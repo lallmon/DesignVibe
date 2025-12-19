@@ -3,25 +3,32 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "." as DV
 
-// Vertical toolbar for drawing tools
-Rectangle {
+// Vertical tool palette for drawing tools
+Pane {
     id: root
     width: DV.Theme.sizes.toolBarWidth
-    color: DV.Theme.colors.panelBackground
     
-    // Signal emitted when a tool is selected
+    leftPadding: DV.Theme.sizes.toolBarPadding
+    rightPadding: DV.Theme.sizes.toolBarPadding
+    topPadding: DV.Theme.sizes.toolBarPadding
+    bottomPadding: DV.Theme.sizes.toolBarPadding
+    
     signal toolSelected(string toolName)
     
     // Current active tool
     property string activeTool: ""
     
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: DV.Theme.sizes.toolBarPadding
+    // ButtonGroup for mutual exclusivity
+    ButtonGroup {
+        id: toolButtonGroup
+        exclusive: true
+    }
+    
+    contentItem: ColumnLayout {
         spacing: DV.Theme.sizes.toolBarSpacing
         
         // Selection tool button
-        Button {
+        ToolButton {
             id: selButton
             Layout.preferredWidth: DV.Theme.sizes.toolButtonSize
             Layout.preferredHeight: DV.Theme.sizes.toolButtonSize
@@ -30,6 +37,7 @@ Rectangle {
             text: ""
             checkable: true
             checked: root.activeTool === "select" || root.activeTool === ""
+            ButtonGroup.group: toolButtonGroup
             
             contentItem: Item {
                 anchors.fill: parent
@@ -44,7 +52,6 @@ Rectangle {
             onClicked: {
                 if (checked) {
                     root.activeTool = "select"
-                    rectButton.checked = false
                     root.toolSelected("select")
                 } else {
                     root.activeTool = ""
@@ -62,7 +69,7 @@ Rectangle {
         }
         
         // Rectangle tool button
-        Button {
+        ToolButton {
             id: rectButton
             Layout.preferredWidth: DV.Theme.sizes.toolButtonSize
             Layout.preferredHeight: DV.Theme.sizes.toolButtonSize
@@ -71,6 +78,7 @@ Rectangle {
             text: ""
             checkable: true
             checked: root.activeTool === "rectangle"
+            ButtonGroup.group: toolButtonGroup
             
             contentItem: Item {
                 anchors.fill: parent
@@ -85,7 +93,6 @@ Rectangle {
             onClicked: {
                 if (checked) {
                     root.activeTool = "rectangle"
-                    selButton.checked = false
                     root.toolSelected("rectangle")
                 } else {
                     root.activeTool = ""
@@ -108,4 +115,5 @@ Rectangle {
         }
     }
 }
+
 

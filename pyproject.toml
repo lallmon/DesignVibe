@@ -2,4 +2,4 @@
 name = "PySide QtQuick Project"
 
 [tool.pyside6-project]
-files = ["main.py", "main.qml", "components/Canvas.qml", "components/SelectTool.qml", "components/RectangleTool.qml", "components/ToolSettings.qml", "components/StatusBar.qml", "components/ToolBar.qml", "components/MenuBar.qml"]
+files = ["main.py", "main.qml", "components/Canvas.qml", "components/SelectTool.qml", "components/RectangleTool.qml", "components/ToolSettings.qml", "components/StatusBar.qml", "components/ToolPalette.qml", "components/RightPanel.qml", "components/MenuBar.qml", "components/SelectionManager.qml", "components/ObjectPropertiesInspector.qml"]

@@ -22,8 +22,10 @@ A digital design application built with PySide6 and Qt Quick.
 
 ### User Interface
 - Menu bar with File and View menus
-- Left vertical toolbar with drawing tools
-- Status bar with real-time zoom level indicator
+- Left vertical tool palette with drawing tools
+- Right resizable panel for object properties (128-256px, default 220px)
+- Status bar with real-time zoom level and cursor position
+- Tool settings bar for active tool options
 
 
 ## Controls
@@ -44,12 +46,21 @@ A digital design application built with PySide6 and Qt Quick.
 ## Project Structure
 
 - `main.py` - Application entry point
-- `main.qml` - Main application window with menu bar
+- `main.qml` - Main application window with menu bar and layout
 - `components/` - QML components directory
   - `Canvas.qml` - Canvas component with pan/zoom and drawing
+  - `Viewport.qml` - Viewport with zoom/pan transforms and grid
   - `MenuBar.qml` - Application menu bar with File and View menus
-  - `StatusBar.qml` - Status bar component with zoom level display
-  - `ToolBar.qml` - Left toolbar with drawing tool buttons
+  - `StatusBar.qml` - Status bar component with zoom level and cursor position
+  - `ToolSettings.qml` - Context-sensitive tool settings bar
+  - `ToolPalette.qml` - Left tool palette with drawing tool buttons
+  - `RightPanel.qml` - Right resizable panel for object properties
+  - `SelectTool.qml` - Select/pan tool implementation
+  - `RectangleTool.qml` - Rectangle drawing tool implementation
+  - `Theme.qml` - Centralized UI constants and styling
+  - `PhIcon.qml` - SVG icon component using Phosphor icons
+- `canvas_renderer.py` - QPainter-based canvas renderer
+- `canvas_items.py` - Canvas item data structures
 - `pyproject.toml` - Project configuration
 - `requirements.txt` - Python dependencies
 

@@ -10,19 +10,26 @@ Item {
     
     // Internal state
     property bool isPanning: false
+    property bool isSelecting: false
     property real lastX: 0
     property real lastY: 0
+    property real selectPressX: 0
+    property real selectPressY: 0
     
     // Sliding window smoothing (averages last N frames)
     property var deltaBufferX: []
     property var deltaBufferY: []
     property int bufferSize: 3  // Average last 3 frames for smooth motion
     
+    // Threshold for distinguishing click from drag (pixels)
+    property real clickThreshold: 5
+    
     // Signals
     signal panDelta(real dx, real dy)
     signal cursorShapeChanged(int shape)
+    signal objectClicked(real viewportX, real viewportY)
     
-    // Handle mouse press for panning (middle button only)
+    // Handle mouse press for panning and selection
     function handlePress(screenX, screenY, button) {
         if (!tool.active) return false;
         
@@ -36,6 +43,13 @@ Item {
             return true;  // Event handled
         }
         
+        if (button === Qt.LeftButton) {
+            isSelecting = true;
+            selectPressX = screenX;
+            selectPressY = screenY;
+            return true;  // Event handled
+        }
+        
         return false;
     }
     
@@ -43,9 +57,24 @@ Item {
     function handleRelease(screenX, screenY, button) {
         if (!tool.active) return false;
         
-        if (isPanning) {
+        if (isPanning && button === Qt.MiddleButton) {
             isPanning = false;
             cursorShapeChanged(Qt.OpenHandCursor);
+            return true;  // Event handled
+        }
+        
+        if (isSelecting && button === Qt.LeftButton) {
+            isSelecting = false;
+            
+            // Check if it was a click (not a drag)
+            var dx = Math.abs(screenX - selectPressX);
+            var dy = Math.abs(screenY - selectPressY);
+            
+            if (dx < clickThreshold && dy < clickThreshold) {
+                // It was a click - emit signal with viewport coords
+                objectClicked(screenX, screenY);
+            }
+            
             return true;  // Event handled
         }
         
@@ -100,6 +129,7 @@ Item {
     // Reset tool state
     function reset() {
         isPanning = false;
+        isSelecting = false;
     }
 }
 

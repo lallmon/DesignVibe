@@ -41,9 +41,9 @@ ApplicationWindow {
             Layout.fillHeight: true
             spacing: 0
             
-            // Left toolbar
-            ToolBar {
-                id: toolBar
+            // Left tool palette
+            ToolPalette {
+                id: toolPalette
                 Layout.fillHeight: true
                 
                 onToolSelected: (toolName) => {
@@ -51,26 +51,42 @@ ApplicationWindow {
                 }
             }
             
-            // Main Viewport with Canvas
-            Viewport {
-                id: viewport
+            // Main content with viewport and right panel
+            SplitView {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                orientation: Qt.Horizontal
                 
-                Canvas {
-                    id: canvas
-                    anchors.fill: parent
-                    zoomLevel: viewport.zoomLevel
-                    offsetX: viewport.offsetX
-                    offsetY: viewport.offsetY
-                    rectangleStrokeWidth: toolSettings.rectangleStrokeWidth
-                    rectangleStrokeColor: toolSettings.rectangleStrokeColor
-                    rectangleFillColor: toolSettings.rectangleFillColor
-                    rectangleFillOpacity: toolSettings.rectangleFillOpacity
+                // Main Viewport with Canvas
+                Viewport {
+                    id: viewport
+                    SplitView.fillWidth: true
+                    SplitView.fillHeight: true
                     
-                    onPanRequested: (dx, dy) => {
-                        viewport.pan(dx, dy);
+                    Canvas {
+                        id: canvas
+                        anchors.fill: parent
+                        zoomLevel: viewport.zoomLevel
+                        offsetX: viewport.offsetX
+                        offsetY: viewport.offsetY
+                        rectangleStrokeWidth: toolSettings.rectangleStrokeWidth
+                        rectangleStrokeColor: toolSettings.rectangleStrokeColor
+                        rectangleFillColor: toolSettings.rectangleFillColor
+                        rectangleFillOpacity: toolSettings.rectangleFillOpacity
+                        
+                        onPanRequested: (dx, dy) => {
+                            viewport.pan(dx, dy);
+                        }
                     }
+                }
+                
+                // Right panel for properties and inspectors
+                RightPanel {
+                    id: rightPanel
+                    SplitView.preferredWidth: 220
+                    SplitView.minimumWidth: 128
+                    SplitView.maximumWidth: 400
+                    SplitView.fillHeight: true
                 }
             }
         }

@@ -35,6 +35,12 @@ QtObject {
         readonly property int toolBarPadding: 8
         readonly property int toolBarSpacing: 8
 
+        // Right Panel
+        readonly property int rightPanelDefaultWidth: 220
+        readonly property int rightPanelMinWidth: 128
+        readonly property int rightPanelMaxWidth: 256
+        readonly property int rightPanelPadding: 12
+
         // Buttons / icons
         readonly property int toolButtonSize: 32
         readonly property int iconSize: 20
