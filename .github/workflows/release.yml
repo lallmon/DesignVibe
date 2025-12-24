@@ -66,7 +66,7 @@ jobs:
       
       - name: Build with pyside6-deploy
         run: |
-          pyside6-deploy -c pysidedeploy.spec
+          pyside6-deploy -c pysidedeploy.spec --force
       
       - name: Create AppImage (Linux)
         if: matrix.os == 'ubuntu-latest'
