@@ -3,7 +3,7 @@ Type=Application
 Name=DesignVibe
 Comment=Hybrid vector/raster digital design application
 Exec=designvibe
-Icon=designvibe
+Icon=appIcon
 Categories=Graphics;2DGraphics;VectorGraphics;
 Terminal=false
 

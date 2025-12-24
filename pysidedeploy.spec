@@ -2,7 +2,7 @@
 title = DesignVibe
 version = __VERSION__
 exec_directory = .
-icon = assets/icon.png
+icon = assets/appIcon.png
 input_file = main.py
 project_dir = .
 project_file = pyproject.toml
