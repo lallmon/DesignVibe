@@ -72,10 +72,16 @@ jobs:
           ccache --set-config=max_size=500M
           ccache --zero-stats
       
-      - name: Build with pyside6-deploy
+      - name: Build with pyside6-deploy (Linux)
+        if: matrix.os == 'ubuntu-latest'
         env:
-          CC: ${{ matrix.os == 'ubuntu-latest' && 'ccache gcc' || '' }}
-          CXX: ${{ matrix.os == 'ubuntu-latest' && 'ccache g++' || '' }}
+          CC: ccache gcc
+          CXX: ccache g++
+        run: |
+          pyside6-deploy -c pysidedeploy.spec --force
+      
+      - name: Build with pyside6-deploy (macOS/Windows)
+        if: matrix.os != 'ubuntu-latest'
         run: |
           pyside6-deploy -c pysidedeploy.spec --force
       
