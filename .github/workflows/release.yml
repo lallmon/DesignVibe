@@ -93,6 +93,7 @@ jobs:
           
           ./linuxdeploy-x86_64.AppImage \
             --appdir deployment \
+            --executable deployment/DesignVibe \
             --desktop-file DesignVibe.desktop \
             --icon-file assets/appIcon.png \
             --output appimage
