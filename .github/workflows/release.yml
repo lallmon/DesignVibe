@@ -91,6 +91,15 @@ jobs:
         run: |
           ccache --show-stats
       
+      - name: Debug - List deployment directory
+        run: |
+          echo "=== Contents of deployment directory ==="
+          ls -la deployment/ || echo "deployment/ directory does not exist"
+          echo "=== Looking for executables ==="
+          find deployment -type f -executable 2>/dev/null || echo "No executables found"
+          echo "=== All files in deployment ==="
+          find deployment -type f 2>/dev/null || echo "No files found"
+      
       - name: Create AppImage (Linux)
         if: matrix.os == 'ubuntu-latest'
         run: |
