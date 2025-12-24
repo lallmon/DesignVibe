@@ -74,9 +74,6 @@ jobs:
           
           echo "Building version: $VERSION_NUMBER"
       
-      - name: Create deployment directory
-        run: mkdir -p deployment
-      
       - name: Build with pyside6-deploy (Linux)
         if: matrix.os == 'ubuntu-latest'
         env:
@@ -91,42 +88,25 @@ jobs:
           pyside6-deploy -c pysidedeploy.spec --force
           echo "=== Immediately after pyside6-deploy ==="
           ls -la
-          ls -la deployment/ || echo "deployment/ not found immediately after build"
       
       - name: Verify build output
         shell: bash
         run: |
-          echo "=== Current directory ==="
-          pwd
-          echo "=== All files in current directory ==="
+          echo "=== Looking for build output ==="
           ls -la
-          echo "=== Looking for deployment directory ==="
-          if [ -d "deployment" ]; then
-            echo "deployment/ exists:"
-            ls -laR deployment/
+          # Check for platform-specific output
+          if [ -d "DesignVibe.app" ]; then
+            echo "Found macOS app bundle: DesignVibe.app"
+            ls -la DesignVibe.app/
+          elif [ -f "DesignVibe.exe" ]; then
+            echo "Found Windows executable: DesignVibe.exe"
+          elif [ -f "DesignVibe" ] || [ -f "main.bin" ]; then
+            echo "Found Linux executable"
           else
-            echo "deployment/ not found in current dir"
-          fi
-          echo "=== Searching for .app bundles and executables ==="
-          find /Users/runner/work -name "*.app" -o -name "*.exe" -o -name "*.bin" 2>/dev/null | head -30
-          echo "=== Searching for DesignVibe anywhere ==="
-          find /Users/runner/work -name "DesignVibe*" 2>/dev/null | head -20
-          echo "=== Check if deployment exists anywhere ==="
-          find /Users/runner/work -type d -name "deployment" 2>/dev/null
-          if [ ! -d "deployment" ] || [ -z "$(ls -A deployment 2>/dev/null)" ]; then
             echo "ERROR: No build output found"
+            find . -name "*.app" -o -name "*.exe" -o -name "*.bin" 2>/dev/null
             exit 1
           fi
-      
-      - name: Debug - List deployment directory
-        shell: bash
-        run: |
-          echo "=== Contents of deployment directory ==="
-          ls -la deployment/ || echo "deployment/ directory does not exist"
-          echo "=== Looking for executables ==="
-          find deployment -type f -executable 2>/dev/null || echo "No executables found"
-          echo "=== All files in deployment ==="
-          find deployment -type f 2>/dev/null || echo "No files found"
       
       - name: Create AppImage (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -134,9 +114,16 @@ jobs:
           wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           chmod +x linuxdeploy-x86_64.AppImage
           
+          # Find the executable (could be DesignVibe or main.bin)
+          EXEC_FILE=$(find . -maxdepth 1 -type f -executable -name "DesignVibe" -o -name "main.bin" | head -1)
+          echo "Found executable: $EXEC_FILE"
+          
+          mkdir -p AppDir/usr/bin
+          cp "$EXEC_FILE" AppDir/usr/bin/DesignVibe
+          
           ./linuxdeploy-x86_64.AppImage \
-            --appdir deployment \
-            --executable deployment/DesignVibe \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/DesignVibe \
             --desktop-file DesignVibe.desktop \
             --icon-file assets/appIcon.png \
             --output appimage
@@ -147,7 +134,7 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: |
           hdiutil create -volname "DesignVibe" \
-            -srcfolder deployment/DesignVibe.app \
+            -srcfolder DesignVibe.app \
             -ov -format UDZO \
             ${{ matrix.artifact }}
       
@@ -155,7 +142,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
-          mv deployment/DesignVibe.exe ${{ matrix.artifact }}
+          mv DesignVibe.exe ${{ matrix.artifact }}
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
