@@ -15,16 +15,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Temporarily testing macOS only - re-enable others once working
-          # - os: ubuntu-latest
-          #   platform: Linux
-          #   artifact: DesignVibe-${{ github.ref_name }}-x86_64.AppImage
-          - os: macos-latest
-            platform: macOS
-            artifact: DesignVibe-${{ github.ref_name }}-macOS.dmg
+          - os: ubuntu-latest
+            platform: Linux
+          # - os: macos-latest
+          #   platform: macOS
           # - os: windows-latest
           #   platform: Windows
-          #   artifact: DesignVibe-${{ github.ref_name }}-Windows.exe
     
     steps:
       - name: Checkout code
@@ -90,8 +86,6 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         run: |
           pyside6-deploy -c pysidedeploy.spec --force
-          echo "=== Immediately after pyside6-deploy ==="
-          ls -la
       
       - name: Verify build output
         shell: bash
