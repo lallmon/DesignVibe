@@ -74,10 +74,13 @@ jobs:
           wget https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
           chmod +x linuxdeploy-x86_64.AppImage
           
+          # Copy icon with name matching desktop file Icon entry
+          cp assets/icon.png designvibe.png
+          
           ./linuxdeploy-x86_64.AppImage \
             --appdir deployment \
             --desktop-file DesignVibe.desktop \
-            --icon-file assets/icon.png \
+            --icon-file designvibe.png \
             --output appimage
           
           mv DesignVibe-*.AppImage ${{ matrix.artifact }}
