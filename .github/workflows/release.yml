@@ -73,6 +73,10 @@ jobs:
           mv main.py.tmp main.py
           
           echo "Building version: $VERSION_NUMBER"
+          
+          # Export sanitized ref name for artifact naming (replace / with -)
+          SAFE_REF_NAME=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          echo "SAFE_REF_NAME=$SAFE_REF_NAME" >> $GITHUB_ENV
       
       - name: Build with pyside6-deploy (Linux)
         if: matrix.os == 'ubuntu-latest'
@@ -128,7 +132,7 @@ jobs:
             --icon-file assets/appIcon.png \
             --output appimage
           
-          mv DesignVibe-*.AppImage ${{ matrix.artifact }}
+          mv DesignVibe-*.AppImage "DesignVibe-${SAFE_REF_NAME}-x86_64.AppImage"
       
       - name: Create DMG (macOS)
         if: matrix.os == 'macos-latest'
@@ -136,19 +140,19 @@ jobs:
           hdiutil create -volname "DesignVibe" \
             -srcfolder DesignVibe.app \
             -ov -format UDZO \
-            ${{ matrix.artifact }}
+            "DesignVibe-${SAFE_REF_NAME}-macOS.dmg"
       
       - name: Create Installer (Windows)
         if: matrix.os == 'windows-latest'
         shell: bash
         run: |
-          mv DesignVibe.exe ${{ matrix.artifact }}
+          mv DesignVibe.exe "DesignVibe-${SAFE_REF_NAME}-Windows.exe"
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.platform }}-build
-          path: ${{ matrix.artifact }}
+          path: DesignVibe-*
   
   release:
     name: Create GitHub Release
