@@ -5,7 +5,14 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional
 if TYPE_CHECKING:
     from canvas_model import CanvasModel
 
-from canvas_items import RectangleItem, EllipseItem
+from canvas_items import CanvasItem, RectangleItem, EllipseItem
+
+
+def _create_item(item_data: Dict[str, Any]) -> CanvasItem:
+    """Create a CanvasItem from a dictionary."""
+    if item_data.get("type") == "rectangle":
+        return RectangleItem.from_dict(item_data)
+    return EllipseItem.from_dict(item_data)
 
 
 class Command(ABC):
@@ -42,15 +49,9 @@ class AddItemCommand(Command):
         return f"Add {item_type}"
 
     def execute(self) -> None:
-        item_type = self._item_data.get("type", "")
-        if item_type == "rectangle":
-            item = RectangleItem.from_dict(self._item_data)
-        elif item_type == "ellipse":
-            item = EllipseItem.from_dict(self._item_data)
-        else:
+        if self._item_data.get("type") not in ("rectangle", "ellipse"):
             return
-
-        self._model._items.append(item)
+        self._model._items.append(_create_item(self._item_data))
         self._index = len(self._model._items) - 1
         self._model.itemAdded.emit(self._index)
 
@@ -83,12 +84,7 @@ class RemoveItemCommand(Command):
 
     def undo(self) -> None:
         if self._item_data:
-            item_type = self._item_data.get("type", "")
-            if item_type == "rectangle":
-                item = RectangleItem.from_dict(self._item_data)
-            else:
-                item = EllipseItem.from_dict(self._item_data)
-            self._model._items.insert(self._index, item)
+            self._model._items.insert(self._index, _create_item(self._item_data))
             self._model.itemAdded.emit(self._index)
 
 
@@ -120,12 +116,7 @@ class UpdateItemCommand(Command):
     def _apply_props(self, props: Dict[str, Any]) -> None:
         if not (0 <= self._index < len(self._model._items)):
             return
-        item_type = props.get("type", "")
-        if item_type == "rectangle":
-            item = RectangleItem.from_dict(props)
-        else:
-            item = EllipseItem.from_dict(props)
-        self._model._items[self._index] = item
+        self._model._items[self._index] = _create_item(props)
         self._model.itemModified.emit(self._index)
 
 
@@ -147,11 +138,7 @@ class ClearCommand(Command):
 
     def undo(self) -> None:
         for item_data in self._snapshot:
-            item_type = item_data.get("type", "")
-            if item_type == "rectangle":
-                self._model._items.append(RectangleItem.from_dict(item_data))
-            else:
-                self._model._items.append(EllipseItem.from_dict(item_data))
+            self._model._items.append(_create_item(item_data))
         for i in range(len(self._model._items)):
             self._model.itemAdded.emit(i)
 

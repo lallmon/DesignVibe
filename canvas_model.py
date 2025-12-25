@@ -1,9 +1,4 @@
-"""
-Canvas model for DesignVibe.
-
-This module provides the CanvasModel class, which manages canvas items
-as a proper Qt model with incremental updates and proper change signals.
-"""
+"""Canvas model for DesignVibe - manages canvas items with undo/redo support."""
 from typing import List, Optional, Dict, Any
 from PySide6.QtCore import QObject, Signal, Slot, Property
 from canvas_items import CanvasItem, RectangleItem, EllipseItem
@@ -14,13 +9,7 @@ from commands import (
 
 
 class CanvasModel(QObject):
-    """
-    Canvas model that manages CanvasItem objects.
-    
-    Provides efficient incremental updates by converting items once
-    and emitting granular change signals. Acts as single source of truth
-    for canvas items.
-    """
+    """Manages CanvasItem objects with signals for incremental UI updates."""
 
     itemAdded = Signal(int)
     itemRemoved = Signal(int)
@@ -35,6 +24,7 @@ class CanvasModel(QObject):
         self._undo_stack: List[Command] = []
         self._redo_stack: List[Command] = []
         self._transaction: Optional[TransactionCommand] = None
+        self._transaction_snapshot: Dict[int, Dict[str, Any]] = {}
 
     def _execute_command(self, command: Command, record: bool = True) -> None:
         command.execute()
@@ -80,7 +70,6 @@ class CanvasModel(QObject):
 
     @Slot(dict)
     def addItem(self, item_data: Dict[str, Any]) -> None:
-        """Add a new item to the canvas."""
         item_type = item_data.get("type", "")
         if item_type not in ("rectangle", "ellipse"):
             print(f"Warning: Unknown item type '{item_type}'")
@@ -91,7 +80,6 @@ class CanvasModel(QObject):
 
     @Slot(int)
     def removeItem(self, index: int) -> None:
-        """Remove an item from the canvas by index."""
         if not (0 <= index < len(self._items)):
             print(f"Warning: Cannot remove item at invalid index {index}")
             return
@@ -101,7 +89,6 @@ class CanvasModel(QObject):
 
     @Slot()
     def clear(self) -> None:
-        """Clear all items from the canvas."""
         if not self._items:
             self.itemsCleared.emit()
             return
@@ -111,7 +98,6 @@ class CanvasModel(QObject):
 
     @Slot(int, dict)
     def updateItem(self, index: int, properties: Dict[str, Any]) -> None:
-        """Update properties of an existing item."""
         if not (0 <= index < len(self._items)):
             print(f"Warning: Cannot update item at invalid index {index}")
             return
@@ -167,7 +153,6 @@ class CanvasModel(QObject):
 
     @Slot(result=int)
     def count(self) -> int:
-        """Get the number of items in the canvas."""
         return len(self._items)
 
     def _canUndo(self) -> bool:
@@ -205,23 +190,19 @@ class CanvasModel(QObject):
         return True
 
     def getItems(self) -> List[CanvasItem]:
-        """Get all canvas items for rendering."""
         return self._items
 
     @Slot(int, result='QVariant')
     def getItemData(self, index: int) -> Optional[Dict[str, Any]]:
-        """Get item data as a dictionary for QML queries."""
         if 0 <= index < len(self._items):
             return self._itemToDict(self._items[index])
         return None
 
     @Slot(result='QVariantList')
     def getItemsForHitTest(self) -> List[Dict[str, Any]]:
-        """Get all items as dictionaries for hit testing in QML."""
         return [self._itemToDict(item) for item in self._items]
 
     def _itemToDict(self, item: CanvasItem) -> Dict[str, Any]:
-        """Convert a CanvasItem to a dictionary for QML."""
         if isinstance(item, RectangleItem):
             return {
                 "type": "rectangle",
