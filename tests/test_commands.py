@@ -69,6 +69,18 @@ class TestAddItemCommand:
         cmd = AddItemCommand(canvas_model, {"type": "rectangle", "x": 0, "y": 0, "width": 10, "height": 10})
         assert "Add" in cmd.description
 
+    def test_execute_invalid_type_does_nothing(self, canvas_model):
+        """Test execute with invalid item type does nothing."""
+        cmd = AddItemCommand(canvas_model, {"type": "triangle", "x": 0, "y": 0})
+        cmd.execute()
+        assert canvas_model.count() == 0
+
+    def test_undo_before_execute_does_nothing(self, canvas_model):
+        """Test undo before execute does nothing safely."""
+        cmd = AddItemCommand(canvas_model, {"type": "rectangle", "x": 0, "y": 0, "width": 10, "height": 10})
+        cmd.undo()
+        assert canvas_model.count() == 0
+
 
 class TestRemoveItemCommand:
     """Tests for RemoveItemCommand."""
@@ -99,6 +111,19 @@ class TestRemoveItemCommand:
         canvas_model._items.append(RectangleItem(0, 0, 100, 100))
         cmd = RemoveItemCommand(canvas_model, 0)
         assert "Delete" in cmd.description or "Remove" in cmd.description
+
+    def test_description_after_execute_shows_type(self, canvas_model):
+        """Test description shows correct type after execute."""
+        canvas_model._items.append(RectangleItem(0, 0, 100, 100))
+        cmd = RemoveItemCommand(canvas_model, 0)
+        cmd.execute()
+        assert "Rectangle" in cmd.description
+
+    def test_execute_invalid_index_does_nothing(self, canvas_model):
+        """Test execute with out-of-bounds index does nothing."""
+        cmd = RemoveItemCommand(canvas_model, 99)
+        cmd.execute()
+        assert canvas_model.count() == 0
 
 
 class TestUpdateItemCommand:
@@ -142,6 +167,15 @@ class TestUpdateItemCommand:
         canvas_model._items.append(RectangleItem(0, 0, 100, 100))
         cmd = UpdateItemCommand(canvas_model, 0, {}, {})
         assert cmd.description
+
+    def test_execute_invalid_index_does_nothing(self, canvas_model):
+        """Test execute with out-of-bounds index does nothing."""
+        old_props = {"type": "rectangle", "x": 0, "y": 0, "width": 100, "height": 100,
+                     "strokeWidth": 1, "strokeColor": "#ffffff", "strokeOpacity": 1.0,
+                     "fillColor": "#ffffff", "fillOpacity": 0.0}
+        cmd = UpdateItemCommand(canvas_model, 99, old_props, old_props)
+        cmd.execute()
+        assert canvas_model.count() == 0
 
 
 class TestClearCommand:

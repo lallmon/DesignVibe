@@ -156,13 +156,6 @@ class TransactionCommand(Command):
     def description(self) -> str:
         return self._description
 
-    @property
-    def commands(self) -> List[Command]:
-        return self._commands
-
-    def add(self, command: Command) -> None:
-        self._commands.append(command)
-
     def execute(self) -> None:
         for cmd in self._commands:
             cmd.execute()
