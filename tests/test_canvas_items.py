@@ -6,6 +6,8 @@ from canvas_items import (
     CanvasItem, RectangleItem, EllipseItem, LayerItem,
     CANVAS_OFFSET_X, CANVAS_OFFSET_Y
 )
+from PySide6.QtGui import QImage, QPainter
+from PySide6.QtCore import QSize
 
 
 class TestRectangleItem:
@@ -343,6 +345,26 @@ class TestCanvasCoordinates:
         """Test that canvas offset constants are defined."""
         assert CANVAS_OFFSET_X == 5000
         assert CANVAS_OFFSET_Y == 5000
+
+
+class TestCanvasPainting:
+    """Smoke tests for paint paths to ensure coverage."""
+
+    def test_rectangle_paint_runs(self, qtbot):
+        img = QImage(QSize(10, 10), QImage.Format_ARGB32)
+        img.fill(0)
+        painter = QPainter(img)
+        rect = RectangleItem(x=0, y=0, width=5, height=5)
+        rect.paint(painter, zoom_level=1.0)
+        painter.end()
+
+    def test_ellipse_paint_runs(self, qtbot):
+        img = QImage(QSize(10, 10), QImage.Format_ARGB32)
+        img.fill(0)
+        painter = QPainter(img)
+        ellipse = EllipseItem(center_x=5, center_y=5, radius_x=4, radius_y=3)
+        ellipse.paint(painter, zoom_level=2.0)
+        painter.end()
 
 
 class TestCanvasItemName:

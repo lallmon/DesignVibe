@@ -21,11 +21,11 @@ Pane {
             ObjectPropertiesInspector {
                 id: propertiesInspector
                 anchors.fill: parent
-                
                 Binding {
                     target: propertiesInspector
                     property: "selectedItem"
                     value: DV.SelectionManager.selectedItem
+                    when: DV.SelectionManager.selectedItem !== propertiesInspector.selectedItem
                     restoreMode: Binding.RestoreNone
                 }
             }
