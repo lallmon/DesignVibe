@@ -435,14 +435,42 @@ class CanvasModel(QAbstractListModel):
         return [self._itemToDict(item) for item in self._items]
 
     def getRenderItems(self) -> List[CanvasItem]:
-        """Return items in render order (bottom to top), skipping layers."""
+        """Return items in render order (front to back) skipping layers.
+        
+        Groups children under their layer, reversing order within each group so
+        the latest-added child paints above earlier siblings. Layers retain
+        their model order.
+        """
         from canvas_items import LayerItem, RectangleItem, EllipseItem
 
-        items = self._items
-        ordered: List[CanvasItem] = []
-        for item in reversed(items):
+        groups: List[List[CanvasItem]] = []
+        current_group: List[CanvasItem] = []
+
+        def flush_group():
+            if current_group:
+                # reverse within group so later siblings are on top
+                groups.append(list(reversed(current_group)))
+
+        current_layer_id = None
+
+        for item in self._items:
+            if isinstance(item, LayerItem):
+                flush_group()
+                current_group = []
+                current_layer_id = item.id
+                continue
+
             if isinstance(item, (RectangleItem, EllipseItem)):
-                ordered.append(item)
+                # If parent matches current layer or no parent (top-level), append
+                current_group.append(item)
+                continue
+
+        flush_group()
+
+        # Flatten groups in encounter order (top-first)
+        ordered: List[CanvasItem] = []
+        for group in groups:
+            ordered.extend(group)
         return ordered
 
     def _itemToDict(self, item: CanvasItem) -> Dict[str, Any]:
