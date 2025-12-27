@@ -1,7 +1,7 @@
 """Unit tests for item_schema validation and serialization."""
 import pytest
 
-from canvas_items import RectangleItem, EllipseItem, LayerItem
+from canvas_items import RectangleItem, EllipseItem, LayerItem, CanvasItem
 from item_schema import (
     ItemSchemaError,
     ItemType,
@@ -120,4 +120,22 @@ def test_item_to_dict_round_trips_layer():
     assert out["type"] == ItemType.LAYER.value
     assert out["name"] == "L"
     assert out["id"] == "lid"
+
+
+def test_parse_item_invalid_ellipse_raises():
+    with pytest.raises(ItemSchemaError):
+        parse_item({"type": "ellipse", "centerX": "bad"})
+
+
+def test_item_to_dict_rejects_unknown():
+    class Unknown(CanvasItem):
+        def paint(self, painter, zoom_level, offset_x=0, offset_y=0):
+            pass
+
+        @staticmethod
+        def from_dict(data):
+            return Unknown()
+
+    with pytest.raises(ItemSchemaError):
+        item_to_dict(Unknown())
 

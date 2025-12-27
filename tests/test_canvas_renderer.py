@@ -4,6 +4,8 @@ from unittest.mock import MagicMock, patch
 from canvas_renderer import CanvasRenderer
 from canvas_model import CanvasModel
 from canvas_items import RectangleItem, EllipseItem, LayerItem
+from PySide6.QtGui import QImage, QPainter
+from PySide6.QtCore import QSize
 
 
 class TestCanvasRendererZOrder:
@@ -104,6 +106,32 @@ class TestCanvasRendererZOrder:
         canvas_model.getRenderItems = lambda: sentinel  # type: ignore[attr-defined]
         canvas_renderer.setModel(canvas_model)
         assert canvas_renderer._get_render_order() is sentinel
+
+    def test_paint_no_model_is_noop(self, canvas_renderer):
+        image = QImage(QSize(5, 5), QImage.Format_ARGB32)
+        image.fill(0)
+        painter = QPainter(image)
+        canvas_renderer.paint(painter)  # should not raise
+        painter.end()
+
+    def test_paint_invokes_item_paint(self, canvas_renderer, canvas_model):
+        """paint should iterate over render items and call their paint methods."""
+        calls = []
+
+        class DummyItem:
+            def paint(self, painter, zoom):
+                calls.append(("paint", zoom))
+
+        canvas_model.getRenderItems = lambda: [DummyItem()]  # type: ignore[attr-defined]
+        canvas_renderer.setModel(canvas_model)
+
+        image = QImage(QSize(10, 10), QImage.Format_ARGB32)
+        image.fill(0)
+        painter = QPainter(image)
+        canvas_renderer.paint(painter)
+        painter.end()
+
+        assert calls == [("paint", 1.0)]
 
     def test_empty_model_returns_empty_render_order(self, canvas_renderer, canvas_model):
         """Empty model should return empty render order."""

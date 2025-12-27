@@ -115,3 +115,23 @@ def test_history_exposes_stacks_via_properties():
     assert history.can_redo is False
 
 
+def test_end_transaction_without_begin_is_noop():
+    history = HistoryManager()
+    history.end_transaction()  # should not throw
+    assert history.can_undo is False
+
+
+def test_transaction_clears_redo_when_executed():
+    history = HistoryManager()
+    state = []
+    history.execute(DummyCommand(state, "a"))
+    history.undo()
+    assert history.can_redo is True
+
+    history.begin_transaction("Txn")
+    history.execute(DummyCommand(state, "b"))
+    history.end_transaction()
+
+    assert history.can_redo is False
+
+
